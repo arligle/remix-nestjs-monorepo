@@ -23,6 +23,18 @@
        "@/master/*": [
         "apps/master/src/*"
       ],
+      "@ifc-drizzle/node-postgres": [
+        "libs/node-postgres/src"
+      ],
+      "@ifc-drizzle/node-postgres/*": [
+        "libs/node-postgres/src/*"
+      ],
+      "@ifc-drizzle/biz-saas-db-schema": [
+        "libs/biz-saas-db-schema/src"
+      ],
+      "@ifc-drizzle/biz-saas-db-schema/*": [
+        "libs/biz-saas-db-schema/src/*"
+      ]
     }
   }
 }

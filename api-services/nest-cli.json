@@ -27,6 +27,24 @@
       "compilerOptions": {
         "tsConfigPath": "apps/reader/tsconfig.app.json"
       }
+    },
+    "node-postgres": {
+      "type": "library",
+      "root": "libs/node-postgres",
+      "entryFile": "index",
+      "sourceRoot": "libs/node-postgres/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/node-postgres/tsconfig.lib.json"
+      }
+    },
+    "biz-saas-db-schema": {
+      "type": "library",
+      "root": "libs/biz-saas-db-schema",
+      "entryFile": "index",
+      "sourceRoot": "libs/biz-saas-db-schema/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/biz-saas-db-schema/tsconfig.lib.json"
+      }
     }
   }
 }
