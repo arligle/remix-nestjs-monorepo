@@ -4,7 +4,12 @@ import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fa
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { Logger } from '@nestjs/common';
+import cluster from 'node:cluster';
+import { isDev, isMainProcess } from './env';
+import { ConfigService } from '@nestjs/config';
+import type { ConfigKeyPaths } from './config';
 
+declare const module: any;
 
 async function bootstrap() {
 
@@ -19,6 +24,19 @@ async function bootstrap() {
     }
   );
 
+  const configService = app.get(ConfigService<ConfigKeyPaths>);
+
+  const { port, globalPrefix } = configService.get('app', { infer: true });
+
+  // 更换日志输出器 为 nest-winston
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  // 允许跨域
+  app.enableCors({ origin: '*', credentials: true });
+  // app.setGlobalPrefix(globalPrefix);
+
+  // 生产环境启用应用程序的关闭钩子
+  !isDev && app.enableShutdownHooks();
+  // Swagger
   const options = new DocumentBuilder()
     .setTitle('BIZ SAAS API')
     .setDescription('The Biz Saas API description')
@@ -29,13 +47,27 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(3000, async () => {
-    // 更换日志输出器 为 winston
-    app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
+  await app.listen(port, '0.0.0.0', async () => {
+
     // 控制台的日志输出依然是nestjs内置的 Logger
-    const logger = new Logger('NestFastifyApplication');
+    const logger = new Logger('NestApplication');
     const url = await app.getUrl();
-    logger.log(`Master API Service is running on: ${url}`);
+    const { pid } = process;
+    const env = cluster.isPrimary;
+    const prefix = env ? 'P' : 'W';
+
+    if (!isMainProcess)
+      return;
+
+    logger.log(`[${prefix + pid}] Master Server running on: ${url}`)
+
+    if (isDev)
+      logger.log(`[${prefix + pid}] OpenAPI: ${url}/api-docs`)
   });
+
+  if (module.hot) {
+    module.hot.accept()
+    module.hot.dispose(() => app.close())
+  };
 }
 bootstrap();
