@@ -14,6 +14,12 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get('books')
+  @ApiTags('getBooks')
+  getBooks(): Promise<{ books: any[] }> {
+    return this.appService.getBooks();
+  }
   /**
    * @description
    * 注意:一旦用 @Response 注入了响应对象，就不能通过 return 的方式来返回响应内容了，

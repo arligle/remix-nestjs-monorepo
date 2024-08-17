@@ -8,6 +8,7 @@ import cluster from 'node:cluster';
 import { isDev, isMainProcess } from './env';
 import { ConfigService } from '@nestjs/config';
 import type { ConfigKeyPaths } from './config';
+import { RedisIoAdapter } from './common/adapters/socket.adapter';
 
 declare const module: any;
 
@@ -46,6 +47,9 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
+
+  // redis
+  app.useWebSocketAdapter(new RedisIoAdapter(app))
 
   await app.listen(port, '0.0.0.0', async () => {
 

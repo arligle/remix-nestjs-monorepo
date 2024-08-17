@@ -8,6 +8,8 @@ import {
 } from 'nest-winston';
 import * as winston from 'winston';
 import config from './config';
+import { DrizzlePGModule } from '@ifc-drizzle/node-postgres';
+import * as schema from '@ifc-drizzle/biz-saas-db-schema';
 
 @Module({
   imports: [
@@ -44,6 +46,21 @@ import config from './config';
         ],
       }),
       inject: [ConfigService],
+    }),
+
+    DrizzlePGModule.registerAsync({
+      tag: 'DB_DEV',
+      useFactory() {
+        return {
+          pg: {
+            connection: 'client',
+            config: {
+              connectionString: process.env.DATABASE_URL,
+            },
+          },
+          config: { schema: { ...schema } },
+        };
+      },
     }),
   ],
   controllers: [AppController],
